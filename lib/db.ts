@@ -1,33 +1,46 @@
-import Database from "better-sqlite3";
+import { createClient, type Client } from "@libsql/client";
 import path from "path";
 import fs from "fs";
 import { ALL_ITEM_IDS } from "./questions";
 
-const DATA_DIR = path.join(process.cwd(), "data");
-if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
-
-const DB_PATH = process.env.DB_PATH || path.join(DATA_DIR, "survey.db");
-
 declare global {
   // eslint-disable-next-line no-var
-  var __surveyDb: Database.Database | undefined;
+  var __surveyDb: Client | undefined;
+  var __surveySchemaReady: Promise<void> | undefined;
 }
 
-function getDb(): Database.Database {
+function getDb(): Client {
   if (!global.__surveyDb) {
-    const db = new Database(DB_PATH);
-    db.pragma("journal_mode = WAL");
-    db.exec(`
-      CREATE TABLE IF NOT EXISTS responses (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        created_at TEXT NOT NULL,
-        answers TEXT NOT NULL,
-        user_agent TEXT
-      );
-    `);
-    global.__surveyDb = db;
+    const url = process.env.TURSO_DATABASE_URL;
+    if (url) {
+      global.__surveyDb = createClient({
+        url,
+        authToken: process.env.TURSO_AUTH_TOKEN,
+      });
+    } else {
+      const dataDir = path.join(process.cwd(), "data");
+      if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+      const dbPath = process.env.DB_PATH || path.join(dataDir, "survey.db");
+      global.__surveyDb = createClient({ url: `file:${dbPath}` });
+    }
   }
   return global.__surveyDb;
+}
+
+function ensureSchema(db: Client): Promise<void> {
+  if (!global.__surveySchemaReady) {
+    global.__surveySchemaReady = db
+      .execute(
+        `CREATE TABLE IF NOT EXISTS responses (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          created_at TEXT NOT NULL,
+          answers TEXT NOT NULL,
+          user_agent TEXT
+        );`
+      )
+      .then(() => undefined);
+  }
+  return global.__surveySchemaReady;
 }
 
 export type StoredResponse = {
@@ -37,10 +50,10 @@ export type StoredResponse = {
   userAgent: string | null;
 };
 
-export function insertResponse(
+export async function insertResponse(
   answers: Record<string, string>,
   userAgent: string | null
-): number {
+): Promise<number> {
   const clean: Record<string, string> = {};
   for (const id of ALL_ITEM_IDS) {
     const value = answers[id];
@@ -50,31 +63,32 @@ export function insertResponse(
   }
 
   const db = getDb();
-  const stmt = db.prepare(
-    `INSERT INTO responses (created_at, answers, user_agent) VALUES (?, ?, ?)`
-  );
-  const result = stmt.run(new Date().toISOString(), JSON.stringify(clean), userAgent);
+  await ensureSchema(db);
+  const result = await db.execute({
+    sql: `INSERT INTO responses (created_at, answers, user_agent) VALUES (?, ?, ?)`,
+    args: [new Date().toISOString(), JSON.stringify(clean), userAgent],
+  });
   return Number(result.lastInsertRowid);
 }
 
-export function getAllResponses(): StoredResponse[] {
+export async function getAllResponses(): Promise<StoredResponse[]> {
   const db = getDb();
-  const rows = db
-    .prepare(`SELECT id, created_at, answers, user_agent FROM responses ORDER BY id DESC`)
-    .all() as { id: number; created_at: string; answers: string; user_agent: string | null }[];
+  await ensureSchema(db);
+  const result = await db.execute(
+    `SELECT id, created_at, answers, user_agent FROM responses ORDER BY id DESC`
+  );
 
-  return rows.map((row) => ({
-    id: row.id,
-    createdAt: row.created_at,
-    answers: JSON.parse(row.answers) as Record<string, string>,
-    userAgent: row.user_agent,
+  return result.rows.map((row) => ({
+    id: Number(row.id),
+    createdAt: String(row.created_at),
+    answers: JSON.parse(String(row.answers)) as Record<string, string>,
+    userAgent: (row.user_agent as string | null) ?? null,
   }));
 }
 
-export function getResponseCount(): number {
+export async function getResponseCount(): Promise<number> {
   const db = getDb();
-  const row = db.prepare(`SELECT COUNT(*) as count FROM responses`).get() as {
-    count: number;
-  };
-  return row.count;
+  await ensureSchema(db);
+  const result = await db.execute(`SELECT COUNT(*) as count FROM responses`);
+  return Number(result.rows[0].count);
 }

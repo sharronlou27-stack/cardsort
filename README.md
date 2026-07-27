@@ -19,8 +19,10 @@ interpretation notes are all taken directly from the survey spec and live in
   per-question breakdown of every answer with the ambiguous "watch" options
   and "should be" expected answers highlighted, a raw response table, and a
   CSV export.
-- Responses are stored in a local SQLite database (`data/survey.db`, created
-  automatically, not committed to git).
+- Responses are stored in SQLite via [`@libsql/client`](https://github.com/tursodatabase/libsql-client-ts):
+  a local file (`data/survey.db`, created automatically, not committed to
+  git) for local dev, or a hosted [Turso](https://turso.tech) database in
+  production — see "Deploying" below.
 
 ## Running locally
 
@@ -43,20 +45,33 @@ Visit `http://localhost:3000` to try the survey, and
 
 ## Deploying
 
-This app needs a **persistent filesystem** for the SQLite database, so it
-needs a long-running Node server rather than a stateless/serverless
-platform (plain Vercel won't persist `data/survey.db` between requests).
-Any of these work well:
+### Free option: Vercel + Turso
 
-- Render / Railway / Fly.io — a small "web service" running `npm run build`
-  then `npm start`, with a persistent disk mounted at the project's `data/`
-  directory.
-- A basic VPS (or a Docker container with a mounted volume) running
-  `npm run build && npm start`.
+This is the no-cost path — Vercel's serverless functions don't have a
+persistent local disk, so responses are stored in a free hosted [Turso](https://turso.tech)
+database instead of the local SQLite file.
 
-Set `ADMIN_PASSWORD` and `ADMIN_SESSION_SECRET` as environment variables on
-whichever host you use, and make sure `data/` is on a persistent volume so
-responses survive restarts/redeploys.
+1. Create a free Turso account and database at [turso.tech](https://turso.tech)
+   (via their web dashboard or `turso db create groupr-cardsort` with their
+   CLI). Grab the database URL and create an auth token.
+2. Import this repo into [Vercel](https://vercel.com) (free Hobby plan —
+   sign in with GitHub, "Add New Project", pick this repo).
+3. In the Vercel project's Environment Variables, set:
+   - `ADMIN_PASSWORD`
+   - `ADMIN_SESSION_SECRET` (e.g. `openssl rand -hex 32`)
+   - `TURSO_DATABASE_URL`
+   - `TURSO_AUTH_TOKEN`
+4. Deploy. Every push to the connected branch redeploys automatically.
+
+### Paid alternative: a long-running server
+
+If you'd rather keep everything on a plain local SQLite file with no
+external database, run this as a persistent Node server instead (Render,
+Railway, Fly.io, or a basic VPS/Docker host) — a small "web service"
+running `npm run build` then `npm start`, with a persistent disk mounted
+at the project's `data/` directory, and `ADMIN_PASSWORD` /
+`ADMIN_SESSION_SECRET` set as environment variables. This generally isn't
+free since persistent disks require a paid instance tier on most hosts.
 
 ## Updating the survey
 

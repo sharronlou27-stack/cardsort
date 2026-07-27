@@ -22,7 +22,7 @@ export async function GET(_req: NextRequest) {
     for (const item of section.items) labelById[item.id] = item.label;
   }
 
-  const responses = getAllResponses();
+  const responses = await getAllResponses();
   const header = ["id", "created_at", "user_agent", ...ALL_ITEM_IDS.map((id) => labelById[id])];
 
   const rows = responses.map((r) => [

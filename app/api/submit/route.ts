@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
   }
 
   const userAgent = req.headers.get("user-agent");
-  const id = insertResponse(cleanAnswers, userAgent);
+  const id = await insertResponse(cleanAnswers, userAgent);
 
   return NextResponse.json({ ok: true, id });
 }

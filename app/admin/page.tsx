@@ -6,7 +6,7 @@ import { ALL_ITEM_IDS, INTRO_QUESTION, SECTIONS } from "@/lib/questions";
 
 export const dynamic = "force-dynamic";
 
-export default function AdminPage({
+export default async function AdminPage({
   searchParams,
 }: {
   searchParams: { error?: string };
@@ -18,9 +18,9 @@ export default function AdminPage({
     return <LoginScreen showError={searchParams.error === "1"} />;
   }
 
-  const responses = getAllResponses();
+  const responses = await getAllResponses();
   const aggregations = aggregateAll(responses);
-  const totalResponses = getResponseCount();
+  const totalResponses = await getResponseCount();
 
   const labelById: Record<string, string> = { [INTRO_QUESTION.id]: INTRO_QUESTION.label };
   for (const section of SECTIONS) {
