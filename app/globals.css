@@ -2,10 +2,66 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  /* Groupr style guide — light theme */
+  --bg: #ebedec; /* Gray — BG Secondary Light */
+  --topbar-bg: #e6e1c8; /* Tan — BG Light */
+  --surface: #ffffff;
+  --surface-2: #e6e1c8;
+  --border: #d7d2b8;
+  --text: #004333; /* Green — Text */
+  --text-muted: #4c6058;
+  --text-faint: #839187;
+  --accent: #ff7247; /* Logo Orange */
+  --accent-strong: #e35a30;
+  --accent-soft: #ffe6da;
+  --on-accent: #082b24; /* Dark Green, for text drawn on the orange accent */
+  --good: #006b4f; /* Brand Green — "should be X" semantic */
+  --good-bar: #006b4f;
+  --watch: #8a5a1f; /* darkened Brand Orange (Old) for legible text */
+  --watch-bar: #e69138; /* Brand Orange (Old) — ambiguous-split semantic */
+  --watch-soft: #faead2;
+  --danger: #b6402f;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #082b24; /* Dark Green — BG Secondary Dark */
+    --topbar-bg: #072019;
+    --surface: #0d4536;
+    --surface-2: #0a3a2e;
+    --border: #1c4c3d;
+    --text: #f7f4e8;
+    --text-muted: #bcd2c7;
+    --text-faint: #7fa093;
+    --accent: #ff7247;
+    --accent-strong: #ff8b64;
+    --accent-soft: rgba(255, 114, 71, 0.16);
+    --on-accent: #06201a;
+    --good: #4fe0ab;
+    --good-bar: #37c795;
+    --watch: #f2b25c;
+    --watch-bar: #e69138;
+    --watch-soft: rgba(230, 145, 56, 0.16);
+    --danger: #f08a76;
+  }
+}
+
 html {
-  color-scheme: light;
+  color-scheme: light dark;
 }
 
 body {
   min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
 }
+
+/* Toggled imperatively (not via React state) while a card is being dragged
+   over a bin, so drag feedback doesn't wait on a re-render. */
+.bin-drag-over {
+  border-color: var(--accent) !important;
+  background: var(--accent-soft) !important;
+  transform: scale(1.02);
+}
+

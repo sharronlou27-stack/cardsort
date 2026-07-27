@@ -2,17 +2,17 @@ import Link from "next/link";
 
 export default function ThankYouPage() {
   return (
-    <main className="mx-auto flex min-h-screen max-w-2xl flex-col justify-center px-6 py-16">
-      <div className="rounded-2xl bg-white p-8 text-center shadow-sm ring-1 ring-neutral-200">
-        <h1 className="text-2xl font-semibold text-neutral-900">
+    <main className="mx-auto flex min-h-[calc(100vh-57px)] max-w-2xl flex-col justify-center px-6 py-16">
+      <div className="rounded-[20px] border border-groupr-line bg-groupr-surface p-9 text-center shadow-groupr">
+        <h1 className="font-display text-2xl font-bold text-groupr-ink">
           Thank you for helping us out!
         </h1>
-        <p className="mt-3 text-neutral-600">
+        <p className="mt-3 text-[15px] text-groupr-inkMuted">
           Your answers have been recorded. We really appreciate you taking the time.
         </p>
         <Link
           href="/"
-          className="mt-6 inline-flex items-center justify-center text-sm font-medium text-brand-600 hover:text-brand-700"
+          className="mt-6 inline-flex items-center justify-center font-display text-sm font-bold text-groupr-accentStrong hover:text-groupr-accent"
         >
           Back to home
         </Link>
