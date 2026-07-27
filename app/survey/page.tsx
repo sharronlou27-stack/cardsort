@@ -177,7 +177,7 @@ export default function SurveyPage() {
   const progressPct = Math.round(((stepIndex + 1) / steps.length) * 100);
 
   return (
-    <main className="mx-auto min-h-[calc(100vh-57px)] max-w-2xl px-6 py-10">
+    <main className="mx-auto min-h-screen max-w-2xl px-6 py-10">
       <div className="mb-6">
         <div className="h-1.5 w-full overflow-hidden rounded-full bg-groupr-line">
           <div

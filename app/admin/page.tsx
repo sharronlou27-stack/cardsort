@@ -28,7 +28,7 @@ export default async function AdminPage({
   }
 
   return (
-    <main className="mx-auto min-h-[calc(100vh-57px)] max-w-5xl px-6 py-10">
+    <main className="mx-auto min-h-screen max-w-5xl px-6 py-10">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="font-display text-2xl font-bold text-groupr-ink">
@@ -174,7 +174,7 @@ function ItemCard({ aggregation }: { aggregation: ItemAggregation }) {
 
 function LoginScreen({ showError }: { showError: boolean }) {
   return (
-    <main className="mx-auto flex min-h-[calc(100vh-57px)] max-w-sm flex-col justify-center px-6">
+    <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center px-6">
       <div className="rounded-2xl border border-groupr-line bg-groupr-surface p-8 shadow-groupr">
         <h1 className="font-display text-xl font-bold text-groupr-ink">Admin login</h1>
         <p className="mt-1 text-sm text-groupr-inkMuted">
