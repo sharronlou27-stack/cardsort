@@ -24,6 +24,12 @@ export default function HomePage() {
         >
           Start the survey
         </Link>
+        <Link
+          href="/ambassador-bingo"
+          className="mt-4 inline-flex items-center justify-center text-sm font-semibold text-groupr-inkMuted underline-offset-4 transition hover:text-groupr-ink hover:underline"
+        >
+          View Ambassador Bingo &rarr;
+        </Link>
       </div>
     </main>
   );
